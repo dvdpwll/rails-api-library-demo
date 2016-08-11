@@ -1,0 +1,110 @@
+MVC(R) = Model, View, Controller, Router
+
+1 - Client Request
+2 - Router (get request, Index, URL games)
+3 - Controller (games, index method)
+4 - Model (business logic[validations, formatting])
+5 - Database
+6 - Model
+7 - Controller
+8 - Client
+
+app - holds the code for the application
+bin - hold the binary code for rails
+config - setting for our app
+...
+
+models file names are singular
+controller file names are plural
+
+
+
+coding demo:
+bundle install
+new cmd tab, rails server
+test, need secret tokens
+config/secret.yml, run rake secret
+rake db:nuke_pave, migrations
+restart server, test, success
+test, /books, error (/books does not exist)
+make a route
+  config, routes.rb => get '/books', to: 'books#index'
+test, /books, new error (no books controller)
+make books controller
+test, /books, new error no index method
+make index method in controller
+test, no error, make index do something
+@books = Book.all
+render json: @books
+test, /books, error no Book
+make a book model
+test, /books migration pending
+rake db:migrate
+test, /books, success
+new cmd tab, rails console
+create a book (.new makes a new instance but doesn't save it, use .save to save)
+  (.create makes a new instance and saves it)
+  Book.create([{title:"stuff", author:"stuff"}])
+  Book.new({title:"stuff", author:"stuff"}).save
+Searching for a book
+  Book.all (all books)
+  Book.find_by (only first instance)
+  Book.where (find all)
+  Book.last
+  Book.first
+  Book.find x
+Update a book
+  book = Book.find_by(title:"stuff")
+  book.update(title:"stuff")
+  Book.find_by(id: 3).update(title: 'stuff')
+Destroy a book
+  Book.find_by("stuff").destroy
+Day 2
+CRUD, create, read 1 read all, update, destroy
+test, /books/2, no route for book/2
+make a route, get '/books/:id', to: 'books#show'
+  :id is a dynamic segment, like a variable
+make a route, post '/books', to: 'books#create'
+make a route, patch '/books/:id' to: 'books#update'
+make a route, delete '/books/:id' to: 'books#destroy'
+to see routes, use rake routes in cmd
+easy way to make routes
+  resources :books
+  limit
+  resources :books, only:[:index, :show, :create, :update, :destroy]
+  update will make both put and patch routes, never use put
+test /books/2, show could not be found
+make show method
+  def show, render json: Book.find(params[:id]), end
+make helper methods
+  before_action :set_book, only: [:show, :update, :destroy]
+  def set_book, @book = Book.find(params[:id]), end
+make saftey method
+  def book_params, params.require(:book).permit(:title, :author), end
+make create, update, destroy method
+def create, @book = Book.new(book_params), if @book.save, render json: @book, status: :created, location: @book
+  else, render jason: @book.errors, status: :unprocessable_entity, end
+def update, if @book.update(book_params), head :no_content, else, render jason: @book.errors, status: :unrocessable_entity, end
+def destroy, @book.destroy, head:no_content, end
+set private methods
+  private :set_book, :book_params
+test a curl request
+make a migration
+  rails g migration addSecretInfoToBook secret_info:string
+migrate
+  rake db:migrate
+serializer
+  rails g serialer book
+  hides everything except id
+  attributes :id, :title, :author, :updated_at
+    this will show selected items
+  
+
+
+
+
+
+
+
+
+---
